@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450">
+  <rect width="300" height="450" fill="#1f1f1f"/>
+  <g fill="none" stroke="#e50914" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="150" cy="180" r="50"/>
+    <polygon points="140,160 170,180 140,200"/>
+    <path d="M70,300 L230,300"/>
+    <path d="M90,330 L210,330"/>
+  </g>
+  <text x="150" y="270" fill="#ffffff" font-family="'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">CineBook</text>
+  <text x="150" y="370" fill="#aaaaaa" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" text-anchor="middle">Poster Unavailable</text>
+</svg>

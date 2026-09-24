@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Select Seats - Cine</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a href="/movies"><span class="brand-logo">🎬 Cine</span></a></div>
+    <div class="nav-links">
+        <a href="/movies"><i class="fas fa-film"></i> Movies</a>
+        <a href="/booking/my-bookings" sec:authorize="isAuthenticated()"><i class="fas fa-ticket-alt"></i> My Bookings</a>
+        <a href="/admin" sec:authorize="hasRole('ADMIN')" class="admin-link"><i class="fas fa-user-shield"></i> Admin</a>
+        <a href="/login" sec:authorize="!isAuthenticated()" class="btn-login">Login</a>
+        <a href="/register" sec:authorize="!isAuthenticated()" class="btn-register">Register</a>
+        <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+        <span sec:authorize="isAuthenticated()" class="welcome-msg">
+            <i class="fas fa-user-circle"></i>
+            <span sec:authentication="name"></span>
+        </span>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="seat-page-container">
+
+        <!-- MOVIE SUMMARY HEADER -->
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h2 style="font-size: 28px; margin-bottom: 8px;" th:text="${show.movie.title}">Movie Title</h2>
+            <div class="detail-meta-list" style="justify-content: center;">
+                <span class="detail-meta-item"><i class="fas fa-door-open"></i> <span th:text="${show.hallName}"></span></span>
+                <span class="detail-meta-item"><i class="fas fa-calendar-alt"></i> <span th:text="${show.showDate}"></span></span>
+                <span class="detail-meta-item"><i class="fas fa-clock"></i> <span th:text="${#temporals.format(show.showTime, 'hh:mm a')}"></span></span>
+                <span class="hero-badge-rating">₹<span th:text="${show.ticketPrice}"></span> / seat</span>
+            </div>
+        </div>
+
+        <!-- SCREEN -->
+        <div class="screen-wrapper">
+            <div class="cinema-screen"></div>
+            <div class="screen-text">SCREEN THIS WAY</div>
+        </div>
+
+        <!-- LEGEND -->
+        <div class="seat-legend-modern">
+            <div class="legend-item"><div class="legend-box seat-unit standard"></div> Standard</div>
+            <div class="legend-item"><div class="legend-box seat-unit premium"></div> Premium</div>
+            <div class="legend-item"><div class="legend-box seat-unit vip"></div> VIP</div>
+            <div class="legend-item"><div class="legend-box seat-unit selected"></div> Selected</div>
+            <div class="legend-item"><div class="legend-box seat-unit booked"></div> Booked</div>
+        </div>
+
+        <!-- SEAT GRID -->
+        <div class="seat-grid-modern">
+            <div class="seat-row" th:each="rowLetter : ${#arrays.toArray({'A', 'B', 'C', 'D', 'E', 'F'})}">
+                <div class="row-label" th:text="${rowLetter}">A</div>
+                <div class="row-seats">
+                    <div th:each="seat : ${seats}"
+                         th:if="${seat.seatNumber.startsWith(rowLetter)}"
+                         th:class="'seat-unit ' + (${seat.booked} ? 'booked' : ${seat.seatType.toLowerCase()})"
+                         th:data-seat="${seat.seatNumber}"
+                         th:data-booked="${seat.booked}"
+                         th:text="${seat.seatNumber}"
+                         onclick="toggleSeat(this)">
+                    </div>
+                </div>
+                <div class="row-label" th:text="${rowLetter}">A</div>
+            </div>
+        </div>
+
+        <!-- SUMMARY CARD -->
+        <div class="booking-summary-card">
+            <div class="summary-row">
+                <span>Selected Seats:</span>
+                <b id="selectedSeatsList" style="color: var(--accent-cyan);">None</b>
+            </div>
+            <div class="summary-row">
+                <span>Seat Count:</span>
+                <b id="seatCount">0</b>
+            </div>
+            <div class="summary-row total">
+                <span>Total Amount:</span>
+                <b style="color: var(--accent-gold); font-size: 24px;">₹<span id="totalAmount">0.00</span></b>
+            </div>
+
+            <form method="post" action="/booking/payment" style="margin-top: 16px;">
+                <input type="hidden" name="showId" th:value="${show.id}"/>
+                <input type="hidden" name="selectedSeats" id="selectedSeatsInput"/>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" id="proceedBtn" class="btn-book-primary" style="width: 100%; font-size: 16px;" disabled onclick="prepareBooking()">
+                    Proceed to Payment <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<footer class="footer"><p>🎬 Cine &copy; 2026 — Premium Movie Experience</p></footer>
+
+<script th:src="@{/js/main.js}"></script>
+<script th:inline="javascript">
+    var ticketPrice = /*[[${show.ticketPrice}]]*/ 250;
+</script>
+</body>
+</html>

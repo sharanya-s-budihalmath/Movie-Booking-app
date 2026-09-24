@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${title} ?: 'CineBook'">CineBook</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="nav-brand">
+        <a href="/movies">🎬 CineBook</a>
+    </div>
+    <div class="nav-links">
+        <a href="/movies">Movies</a>
+        <a href="/booking/my-bookings" sec:authorize="isAuthenticated()">My Bookings</a>
+        <a href="/admin" sec:authorize="hasRole('ADMIN')" class="admin-link">Admin</a>
+        <a href="/login" sec:authorize="!isAuthenticated()" class="btn-login">Login</a>
+        <a href="/register" sec:authorize="!isAuthenticated()" class="btn-register">Register</a>
+        <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+        <span sec:authorize="isAuthenticated()" class="welcome-msg">
+            <i class="fas fa-user"></i>
+            <span sec:authentication="name"></span>
+        </span>
+    </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+</div>
+
+<!-- PAGE CONTENT PLACEHOLDER (fragments replace this) -->
+<div th:replace="${content}">Content loads here</div>
+
+<footer class="footer">
+    <p>🎬 CineBook &copy; 2026 | Built with Java Spring Boot</p>
+</footer>
+
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

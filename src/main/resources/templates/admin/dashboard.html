@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Admin Dashboard - CineBook</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-brand"><a href="/movies"><span class="brand-logo">🎬 Cine Admin</span></a></div>
+    <div class="nav-links">
+        <a href="/admin" class="active">Dashboard</a>
+        <a href="/admin/movies">Movies</a>
+        <a href="/admin/shows">Shows</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/bookings">Bookings</a>
+        <a href="/movies" class="btn-login"><i class="fas fa-external-link-alt"></i> View Site</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 style="font-size: 28px; margin-bottom: 24px;">Admin Control Center</h2>
+
+    <div class="stats-grid">
+        <div class="booking-summary-card" style="background: linear-gradient(135deg, rgba(67, 97, 238, 0.2), rgba(58, 12, 163, 0.3)); border-color: rgba(67, 97, 238, 0.4); text-align: center;">
+            <i class="fas fa-film" style="font-size: 32px; color: #4361ee; margin-bottom: 8px;"></i>
+            <div style="font-size: 36px; font-weight: 900; color: #fff;" th:text="${totalMovies}">0</div>
+            <div style="color: var(--text-muted); font-size: 14px;">Total Movies</div>
+        </div>
+        <div class="booking-summary-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 95, 70, 0.3)); border-color: rgba(16, 185, 129, 0.4); text-align: center;">
+            <i class="fas fa-ticket-alt" style="font-size: 32px; color: #10b981; margin-bottom: 8px;"></i>
+            <div style="font-size: 36px; font-weight: 900; color: #fff;" th:text="${totalBookings}">0</div>
+            <div style="color: var(--text-muted); font-size: 14px;">Total Bookings</div>
+        </div>
+        <div class="booking-summary-card" style="background: linear-gradient(135deg, rgba(157, 78, 221, 0.2), rgba(90, 24, 154, 0.3)); border-color: rgba(157, 78, 221, 0.4); text-align: center;">
+            <i class="fas fa-users" style="font-size: 32px; color: #9d4edd; margin-bottom: 8px;"></i>
+            <div style="font-size: 36px; font-weight: 900; color: #fff;" th:text="${totalUsers}">0</div>
+            <div style="color: var(--text-muted); font-size: 14px;">Registered Users</div>
+        </div>
+    </div>
+
+    <h3 style="font-size: 22px; margin: 30px 0 16px;">Recent Booking Activity</h3>
+    <div class="booking-summary-card" style="padding: 0; overflow: hidden;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Reference</th>
+                    <th>User</th>
+                    <th>Movie</th>
+                    <th>Show Date</th>
+                    <th>Seats</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="b : ${recentBookings}">
+                    <td th:text="${b.bookingReference}"></td>
+                    <td th:text="${b.user.name}"></td>
+                    <td th:text="${b.show.movie.title}"></td>
+                    <td th:text="${b.show.showDate}"></td>
+                    <td th:text="${b.seatsBooked}"></td>
+                    <td>₹<span th:text="${b.totalAmount}"></span></td>
+                    <td>
+                        <span class="hero-badge-rating"
+                              th:style="${b.status == 'CONFIRMED'} ? 'background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3);' : 'background: rgba(229, 9, 20, 0.15); color: var(--primary); border-color: rgba(229, 9, 20, 0.3);'"
+                              th:text="${b.status}"></span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer class="footer"><p>🎬 CineBook Admin Control &copy; 2026</p></footer>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

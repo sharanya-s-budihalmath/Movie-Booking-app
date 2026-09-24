@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Manage Users - Cine Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a href="/movies"><span class="brand-logo">🎬 Cine Admin</span></a></div>
+    <div class="nav-links">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/movies">Movies</a>
+        <a href="/admin/shows">Shows</a>
+        <a href="/admin/users" class="active">Users</a>
+        <a href="/admin/bookings">Bookings</a>
+        <a href="/movies">🎬 View Site</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 class="page-title">Registered Users</h2>
+    <table class="admin-table">
+        <thead>
+            <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th></tr>
+        </thead>
+        <tbody>
+            <tr th:each="u : ${users}">
+                <td th:text="${u.id}"></td>
+                <td th:text="${u.name}"></td>
+                <td th:text="${u.email}"></td>
+                <td><span class="status-badge confirmed" th:text="${u.role}"></span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<footer class="footer"><p>🎬 CineBook Admin &copy; 2026</p></footer>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

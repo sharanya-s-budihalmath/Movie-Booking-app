@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Checkout & Payment - Cine</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-brand"><a href="/movies"><span class="brand-logo">🎬 Cine</span></a></div>
+    <div class="nav-links">
+        <a href="/movies"><i class="fas fa-film"></i> Movies</a>
+        <a href="/booking/my-bookings" sec:authorize="isAuthenticated()"><i class="fas fa-ticket-alt"></i> My Bookings</a>
+        <a href="/admin" sec:authorize="hasRole('ADMIN')" class="admin-link"><i class="fas fa-user-shield"></i> Admin</a>
+        <a href="/login" sec:authorize="!isAuthenticated()" class="btn-login">Login</a>
+        <a href="/register" sec:authorize="!isAuthenticated()" class="btn-register">Register</a>
+        <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+        <span sec:authorize="isAuthenticated()" class="welcome-msg">
+            <i class="fas fa-user-circle"></i>
+            <span sec:authentication="name"></span>
+        </span>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 style="font-size: 28px; margin-bottom: 24px;"><i class="fas fa-lock" style="color: var(--accent-gold);"></i> Secure Express Checkout</h2>
+
+    <div class="payment-grid">
+
+        <!-- LEFT: PAYMENT METHODS & FORM -->
+        <div>
+            <!-- PROMO CODE BOX -->
+            <div class="booking-summary-card" style="margin-bottom: 24px;">
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <i class="fas fa-tag" style="color: var(--accent-gold); font-size: 20px;"></i>
+                    <h3 style="font-size: 18px; color: #fff;">Have a Promo Code?</h3>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="promoInput" placeholder="Enter coupon code (e.g. CINE50)" style="flex: 1; text-transform: uppercase; background: var(--bg-card-solid); color: #fff; border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-sm); font-weight: 700; letter-spacing: 1px;"/>
+                    <button type="button" class="btn-trailer-outline" onclick="applyPromoCode()" style="padding: 0 20px;">Apply Code</button>
+                </div>
+                <div id="promoMsg" style="margin-top: 10px; font-size: 13px;"></div>
+            </div>
+
+            <!-- PAYMENT TABS -->
+            <div class="pay-method-tabs">
+                <div class="pay-tab active" data-tab="card" onclick="switchPayTab('card')">
+                    <i class="fas fa-credit-card"></i> Card
+                </div>
+                <div class="pay-tab" data-tab="upi" onclick="switchPayTab('upi')">
+                    <i class="fas fa-qrcode"></i> UPI / QR
+                </div>
+                <div class="pay-tab" data-tab="netbanking" onclick="switchPayTab('netbanking')">
+                    <i class="fas fa-university"></i> Net Banking
+                </div>
+            </div>
+
+            <!-- CARD PAYMENT SECTION -->
+            <div id="cardSection" class="booking-summary-card" style="margin-bottom: 24px;">
+                <div class="card-preview-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-size: 14px; font-weight: 800; letter-spacing: 1px;">CINE PASS CARD</span>
+                        <i class="fab fa-cc-visa" style="font-size: 28px; color: #fff;"></i>
+                    </div>
+                    <div class="card-chip"></div>
+                    <div id="cardDisplayNumber" class="card-number-display">•••• •••• •••• ••••</div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div>
+                            <div style="font-size: 9px; opacity: 0.7; margin-bottom: 2px;">CARD HOLDER</div>
+                            <div id="cardDisplayHolder" class="card-holder-display">YOUR NAME</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 9px; opacity: 0.7; margin-bottom: 2px;">EXPIRES</div>
+                            <div style="font-size: 13px; font-weight: 700;">12/28</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" id="cardNumInput" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNumber(this)"/>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="text" placeholder="MM/YY" maxlength="5"/>
+                    </div>
+                    <div class="form-group">
+                        <label>CVV Code</label>
+                        <input type="password" placeholder="•••" maxlength="3"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Cardholder Name</label>
+                    <input type="text" placeholder="Full Name as on card" oninput="formatCardHolder(this)"/>
+                </div>
+            </div>
+
+            <!-- UPI SECTION (HIDDEN BY DEFAULT) -->
+            <div id="upiSection" class="booking-summary-card" style="display: none; margin-bottom: 24px; text-align: center;">
+                <h3>Scan QR to Pay with Google Pay / PhonePe / Paytm</h3>
+                <div class="qr-code-box">
+                    <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=cine@upi%26pn=Cine%26am=' + ${total}" alt="UPI QR Code"/>
+                </div>
+                <p style="color: var(--text-muted); font-size: 13px;">Scan with any UPI app on your phone to complete payment instantly.</p>
+            </div>
+
+            <!-- NETBANKING SECTION (HIDDEN BY DEFAULT) -->
+            <div id="netbankingSection" class="booking-summary-card" style="display: none; margin-bottom: 24px;">
+                <h3 style="margin-bottom: 16px;">Select Your Bank</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                    <button class="btn-trailer-outline" style="text-align: left; justify-content: flex-start;"><i class="fas fa-building-columns"></i> HDFC Bank</button>
+                    <button class="btn-trailer-outline" style="text-align: left; justify-content: flex-start;"><i class="fas fa-building-columns"></i> ICICI Bank</button>
+                    <button class="btn-trailer-outline" style="text-align: left; justify-content: flex-start;"><i class="fas fa-building-columns"></i> State Bank of India</button>
+                    <button class="btn-trailer-outline" style="text-align: left; justify-content: flex-start;"><i class="fas fa-building-columns"></i> Axis Bank</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: ORDER SUMMARY -->
+        <div>
+            <div class="booking-summary-card">
+                <h3 style="font-size: 20px; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Booking Summary</h3>
+
+                <div class="summary-row">
+                    <span>Movie:</span>
+                    <b th:text="${show.movie.title}" style="color: #fff;">Movie Title</b>
+                </div>
+                <div class="summary-row">
+                    <span>Hall / Theater:</span>
+                    <span th:text="${show.hallName}">Hall</span>
+                </div>
+                <div class="summary-row">
+                    <span>Show Date:</span>
+                    <span th:text="${show.showDate}">Date</span>
+                </div>
+                <div class="summary-row">
+                    <span>Show Time:</span>
+                    <span th:text="${#temporals.format(show.showTime, 'hh:mm a')}">Time</span>
+                </div>
+                <div class="summary-row">
+                    <span>Selected Seats:</span>
+                    <b th:text="${selectedSeats}" style="color: var(--accent-cyan);">Seats</b>
+                </div>
+                <div class="summary-row">
+                    <span>Ticket Price:</span>
+                    <span>₹<span th:text="${show.ticketPrice}"></span> x <span th:text="${seatList.size()}"></span></span>
+                </div>
+                <div class="summary-row total" style="margin-top: 14px;">
+                    <span>Total Payable:</span>
+                    <b style="color: var(--accent-gold); font-size: 22px;">₹<span th:text="${total}"></span></b>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<footer class="footer"><p>🎬 CineBook &copy; 2026</p></footer>
+
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

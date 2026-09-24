@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All Bookings - Cine Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-brand"><a href="/movies"><span class="brand-logo">🎬 Cine Admin</span></a></div>
+    <div class="nav-links">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/movies">Movies</a>
+        <a href="/admin/shows">Shows</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/bookings" class="active">Bookings</a>
+        <a href="/movies">🎬 View Site</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 class="page-title">All Bookings</h2>
+    <table class="admin-table">
+        <thead>
+            <tr><th>Reference</th><th>User</th><th>Movie</th><th>Date</th><th>Seats</th><th>Amount</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr th:each="b : ${bookings}">
+                <td th:text="${b.bookingReference}"></td>
+                <td th:text="${b.user.name}"></td>
+                <td th:text="${b.show.movie.title}"></td>
+                <td th:text="${b.show.showDate}"></td>
+                <td th:text="${b.seatsBooked}"></td>
+                <td>₹<span th:text="${b.totalAmount}"></span></td>
+                <td><span class="status-badge" th:class="'status-badge ' + ${b.status.toLowerCase()}"
+                          th:text="${b.status}"></span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<footer class="footer"><p>🎬 CineBook Admin &copy; 2026</p></footer>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

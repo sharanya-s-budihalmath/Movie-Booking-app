@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Booking Confirmed! - Cine</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-brand"><a href="/movies"><span class="brand-logo">🎬 Cine</span></a></div>
+    <div class="nav-links">
+        <a href="/movies"><i class="fas fa-film"></i> Movies</a>
+        <a href="/booking/my-bookings" sec:authorize="isAuthenticated()"><i class="fas fa-ticket-alt"></i> My Bookings</a>
+        <a href="/admin" sec:authorize="hasRole('ADMIN')" class="admin-link"><i class="fas fa-user-shield"></i> Admin</a>
+        <a href="/login" sec:authorize="!isAuthenticated()" class="btn-login">Login</a>
+        <a href="/register" sec:authorize="!isAuthenticated()" class="btn-register">Register</a>
+        <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+        <span sec:authorize="isAuthenticated()" class="welcome-msg">
+            <i class="fas fa-user-circle"></i>
+            <span sec:authentication="name"></span>
+        </span>
+    </div>
+</nav>
+
+<div class="container" style="max-width: 680px; padding-top: 40px;">
+    <div class="booking-summary-card" style="text-align: center; padding: 36px 30px;">
+        <div style="font-size: 58px; margin-bottom: 12px; filter: drop-shadow(0 0 20px rgba(16,185,129,0.5));">🎉</div>
+        <h1 style="color: #10b981; font-size: 30px; margin-bottom: 8px;">Ticket Booking Confirmed!</h1>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">Your digital movie pass is ready. An email confirmation has been dispatched.</p>
+
+        <!-- CINEMA TICKET CARD PASS -->
+        <div th:if="${booking}" class="ticket-pass-card" style="text-align: left; margin-bottom: 28px;">
+            <div class="ticket-header">
+                <div style="font-weight: 900; font-size: 20px; color: #fff; letter-spacing: 1px;">
+                    🎬 CINE VIP PASS
+                </div>
+                <span class="hero-badge-rating" th:text="${booking.bookingReference}">REF-CODE</span>
+            </div>
+
+            <div class="ticket-body">
+                <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
+                    <img th:src="${booking.show.movie.posterUrl}" th:alt="${booking.show.movie.title}" onerror="this.src='/images/placeholder.svg'" style="width: 85px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border);"/>
+                    <div>
+                        <h2 th:text="${booking.show.movie.title}" style="font-size: 24px; color: #fff; margin-bottom: 6px;">Movie Title</h2>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+                            <span class="tag-pill" th:text="${booking.show.movie.genre}">Genre</span>
+                            <span class="tag-pill" th:text="${booking.show.movie.language}">Language</span>
+                            <span class="tag-pill imax-pill" th:text="${booking.show.hallName}">Hall</span>
+                        </div>
+                        <div style="font-size: 14px; color: var(--text-muted);">
+                            <i class="fas fa-clock"></i> <span th:text="${#temporals.format(booking.show.showTime, 'hh:mm a')}"></span> | <i class="fas fa-calendar-alt"></i> <span th:text="${booking.show.showDate}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ticket-info-grid">
+                    <div>
+                        <span class="ticket-label">SEATS BOOKED</span>
+                        <div class="ticket-value" th:text="${booking.seatsBooked}" style="color: var(--accent-cyan);">A1, A2</div>
+                    </div>
+                    <div>
+                        <span class="ticket-label">TOTAL PAID</span>
+                        <div class="ticket-value" style="color: var(--accent-gold);">₹<span th:text="${booking.totalAmount}"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-footer">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-family: monospace; font-size: 14px; color: var(--text-dim); letter-spacing: 2px;">
+                        ||||| ||| ||||||| |||| |||||
+                    </div>
+                    <button class="btn-trailer-outline" onclick="window.print()" style="padding: 6px 14px; font-size: 13px;">
+                        <i class="fas fa-print"></i> Print Ticket
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 16px; justify-content: center;">
+            <a href="/booking/my-bookings" class="btn-book-primary" style="padding: 12px 24px;">
+                <i class="fas fa-ticket-alt"></i> View My Bookings
+            </a>
+            <a href="/movies" class="btn-trailer-outline" style="padding: 12px 24px;">
+                Browse More Movies
+            </a>
+        </div>
+    </div>
+</div>
+
+<footer class="footer"><p>🎬 Cine &copy; 2026 — Premium Movie Experience</p></footer>
+
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
+

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${movie.title} + ' - Cine'">Movie Detail</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="nav-brand"><a href="/movies"><span class="brand-logo">🎬 Cine</span></a></div>
+    <div class="nav-links">
+        <a href="/movies"><i class="fas fa-film"></i> Movies</a>
+        <a href="/booking/my-bookings" sec:authorize="isAuthenticated()"><i class="fas fa-ticket-alt"></i> My Bookings</a>
+        <a href="/admin" sec:authorize="hasRole('ADMIN')" class="admin-link"><i class="fas fa-user-shield"></i> Admin</a>
+        <a href="/login" sec:authorize="!isAuthenticated()" class="btn-login">Login</a>
+        <a href="/register" sec:authorize="!isAuthenticated()" class="btn-register">Register</a>
+        <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+        <span sec:authorize="isAuthenticated()" class="welcome-msg">
+            <i class="fas fa-user-circle"></i>
+            <span sec:authentication="name"></span>
+        </span>
+    </div>
+</nav>
+
+<!-- MOVIE DETAIL HERO -->
+<div class="detail-hero-backdrop">
+    <div class="container">
+        <a href="/movies" style="color: var(--text-muted); display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; font-weight: 500;">
+            <i class="fas fa-arrow-left"></i> Back to Movies
+        </a>
+
+        <div class="detail-grid">
+            <div class="detail-poster-wrapper">
+                <img th:src="${movie.posterUrl}" th:alt="${movie.title}" onerror="this.src='/images/placeholder.svg'"/>
+            </div>
+            <div class="detail-content">
+                <h1 th:text="${movie.title}">Movie Title</h1>
+
+                <div class="detail-meta-list">
+                    <span class="hero-badge-genre" th:text="${movie.genre}">Genre</span>
+                    <span class="hero-badge-rating">⭐ <span th:text="${movie.rating}"></span>/10</span>
+                    <span class="detail-meta-item"><i class="fas fa-clock"></i> <span th:text="${movie.duration}"></span></span>
+                    <span class="detail-meta-item"><i class="fas fa-globe"></i> <span th:text="${movie.language}"></span></span>
+                    <span class="detail-meta-item"><i class="fas fa-calendar"></i> <span th:text="${movie.releaseDate}"></span></span>
+                    <span class="tag-pill imax-pill"><i class="fas fa-certificate"></i> Dolby Atmos</span>
+                </div>
+
+                <p class="detail-synopsis" th:text="${movie.description}">Synopsis...</p>
+
+                <div class="detail-cast" th:if="${movie.cast != null and !movie.cast.isBlank()}">
+                    <i class="fas fa-users" style="color: var(--accent-cyan); margin-right: 6px;"></i> <b>Starring:</b> <span th:text="${movie.cast}"></span>
+                </div>
+
+                <div style="margin-bottom: 30px;" th:if="${movie.trailerUrl != null and !movie.trailerUrl.isBlank()}">
+                    <button class="btn-trailer-outline"
+                            th:data-trailer="${movie.trailerUrl}"
+                            onclick="openTrailerModal(this.getAttribute('data-trailer'))">
+                        <i class="fas fa-play"></i> Watch Official Trailer
+                    </button>
+                </div>
+
+                <!-- SHOW TIMINGS & DATE SELECTION -->
+                <div class="shows-section">
+                    <h3>🎟️ Select Showtimes & Hall</h3>
+
+                    <!-- DATE TABS -->
+                    <div class="date-tabs" th:if="${!shows.isEmpty()}">
+                        <button class="date-tab-btn active" onclick="filterShowsByDate('all', this)">All Showtimes</button>
+                        <button class="date-tab-btn" onclick="filterShowsByDate('today', this)">Today</button>
+                        <button class="date-tab-btn" onclick="filterShowsByDate('tomorrow', this)">Tomorrow</button>
+                    </div>
+
+                    <div th:if="${shows.isEmpty()}" class="no-shows">
+                        <p><i class="fas fa-info-circle"></i> No shows scheduled for this movie currently.</p>
+                    </div>
+
+                    <div class="shows-grid-modern" th:if="${!shows.isEmpty()}">
+                        <div class="show-card-modern"
+                             th:each="show : ${shows}"
+                             th:data-date="${show.showDate.equals(today) ? 'today' : (show.showDate.equals(tomorrow) ? 'tomorrow' : 'other')}">
+                            <div class="show-hall-tag" th:text="${show.hallName}">HALL</div>
+                            <div class="show-time-large" th:text="${#temporals.format(show.showTime, 'hh:mm a')}">18:30</div>
+                            <div class="detail-meta-item" style="justify-content: center; margin-bottom: 6px; font-size: 12px;">
+                                <i class="fas fa-calendar-alt"></i> <span th:text="${show.showDate}"></span>
+                            </div>
+                            <div class="show-seats-left">
+                                <i class="fas fa-chair"></i> <span th:text="${show.availableSeats} + ' seats available'"></span>
+                            </div>
+                            <div class="show-price-tag">₹<span th:text="${show.ticketPrice}"></span></div>
+
+                            <a th:href="@{/booking/seats/{id}(id=${show.id})}"
+                               class="btn-book-primary"
+                               th:classappend="${show.availableSeats == 0} ? ' disabled' : ''">
+                                <span th:text="${show.availableSeats == 0} ? 'Housefull' : 'Select Seats'"></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TRAILER VIDEO MODAL -->
+<div id="trailerModal" class="trailer-modal">
+    <div class="trailer-modal-backdrop" onclick="closeTrailerModal()"></div>
+    <div class="trailer-modal-container">
+        <button class="trailer-modal-close" onclick="closeTrailerModal()"><i class="fas fa-times"></i></button>
+        <div class="trailer-iframe-wrapper">
+            <iframe id="trailerIframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
+
+<footer class="footer"><p>🎬 Cine &copy; 2026 — Premium Movie Experience</p></footer>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
+
